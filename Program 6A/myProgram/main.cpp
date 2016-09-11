@@ -6,7 +6,7 @@
 #include <fstream>
 #include <iomanip>
 #include <sstream>
-using namespace std; 
+using namespace std;
 
 // Global Variable
 bool isInService;					// for indicating whether the program should still be running
@@ -15,8 +15,9 @@ bool isInService;					// for indicating whether the program should still be runn
 void displayMenu();
 int keyboard(int numStudents, double scores[]);
 void writetofile(string filename, int numStudents, double scores[]);
-void readfile(string filename, double scores[]);
+int readfile(string filename, double scores[]);
 void displayscores(int numStudents, double scores[]);
+void modifyscores(int numStudents, double scores[]);
 
 
 int main()
@@ -40,6 +41,7 @@ int main()
 		// Display a menu and get the user's menu choice
 		displayMenu();
 		cin >> option;
+		cout << endl;
 
 		// Call on the appropriate function depending on what the user entered.
 		switch (option)
@@ -47,33 +49,16 @@ int main()
 		case 'K':
 		case 'k': numStudents = keyboard(numStudents, scores);
 			isInService = true;
-			
-			// ****************************************
-			cout << setprecision(3);
-			for (int i = 1; i <= numStudents; i++)
-			{
-				cout << scores[i] << endl;
-			}
-			cout << endl;
-			// ****************************************
-
 			break;
 
 		case 'W':
-		case 'w': 
+		case 'w':
 			writetofile(filename, numStudents, scores);
 			isInService = true;
 			break;
 
 		case 'R':
-		case 'r': readfile(filename, scores);
-			cout << "Here are the scores:" << endl;
-			cout << setprecision(3);
-			for (int i = 1; i <= numStudents; i++)
-			{
-				cout << scores[i] << endl;
-			}
-			cout << endl;
+		case 'r': numStudents = readfile(filename, scores);
 			isInService = true;
 			break;
 
@@ -83,7 +68,7 @@ int main()
 			break;
 
 		case 'M':
-		case 'm': //modifyscores(numStudents, scores);
+		case 'm': modifyscores(numStudents, scores);
 			isInService = true;
 			break;
 
@@ -91,7 +76,7 @@ int main()
 		case 'q': isInService = false;		// The Service Mode is off
 			break;
 
-		default: 
+		default:
 			cin.ignore(numeric_limits<streamsize>::max(), '\n'); //cleans up user error
 			//Display an error message
 			cout << "That is not a valid menu option. \n Please try again, or type Q to quit." << endl << endl;
@@ -191,7 +176,7 @@ int keyboard(int numStudents, double scores[])
 		if (scores[i] == -1)
 			break;
 	}
-
+	cout << endl;
 	return numStudents;
 }
 
@@ -226,31 +211,52 @@ void writetofile(string filename, int numStudents, double scores[])
 //*******************************************************************************************
 //This reads the scores out of a file that was previously created by this program.			*
 //*******************************************************************************************
-void readfile(string filename, double scores[])
+int readfile(string filename, double scores[])
 {
 	int numStudents;
+	double foo;
 
 	//Get the file name from the user
 	cout << "What is the name of the file you would like to open? ";
 	cin >> filename;
 	cout << endl;
 
-	// Create the file
+	// Open the file
 	filename = filename + ".txt";
-	ifstream fin;
-	fin.open(filename.c_str());
+	ifstream fin(filename);
+	fin.open(filename);
+	cout << "I am trying to open " << filename << endl;
 
-	fin >> numStudents;
-	cout << setprecision(3);
 
-	
-	for (int i = 1; i <= 100; i++)
+	// Validate that the file is open
+	if (fin.is_open())
 	{
-		fin >> scores[i];
-	}
-	fin.close();
+		// Get numStudents
+		fin >> foo;
+		numStudents = foo;
+		cout << "# of students = " << numStudents << endl;
+		scores[0] = numStudents;
 
-	cout << "Success! The scores were read in from the file." << endl << endl;
+		// Get scores
+		for (int i = 1; i <= numStudents; i++)
+		{
+			fin >> foo;
+			scores[i] = foo;
+			if (fin.fail())
+			{
+				cout << "Reached the end of the file." << endl;
+			}
+			break;
+		}
+		fin.close();
+		cout << "Success! The scores were read in from the file." << endl << endl;
+		return numStudents;
+	}
+	else
+	{
+		numStudents = 0;
+		cout << "Unable to open file, please try again." << endl << endl;
+	}
 }
 
 
@@ -260,18 +266,88 @@ void readfile(string filename, double scores[])
 //*******************************************************************************************
 void displayscores(int numStudents, double scores[])
 {
+	(double)numStudents; //Converts int to double so that it can store it in the double array
 	numStudents = scores[0];
 
+	// Check to make sure there is data
 	if (numStudents < 1)
 	{
 		cout << "Error! There is not even one student.";
 		cout << "You may need to input scores. Press K or R on the main menu." << endl;
 	}
-	cout << setprecision(3);
-	cout << "The number of students that have scores entered is " << numStudents << "." << endl;
-	for (int i = 1; i <= numStudents; i++)
+	else
 	{
-		cout << scores[i] << endl;
+		cout << setprecision(3);
+		cout << "The number of students that have scores entered is " << numStudents << "." << endl;
+		for (int i = 1; i <= numStudents; i++)
+		{
+			cout << scores[i] << endl;
+		}
 	}
 	cout << endl;
+}
+
+void modifyscores(int numStudents, double scores[])
+{
+	int i;	//holds row number
+
+	// Check to make sure there is data
+	if (numStudents < 1)
+	{
+		cout << "Error! There is not even one student.";
+		cout << "You may need to input scores. Press K or R on the main menu." << endl << endl;
+	}
+	else
+	{
+		// Ask the user for the element they want to change
+		cout << "Which row do you want to modify the score for? ";
+		cin >> i;
+		cout << endl;
+
+		// Validate the row number
+		while (i > numStudents)
+		{
+			cout << "Sorry, that row does not exist. Please enter " << numStudents << " or less." << endl;
+			cout << "\n row = ";
+			cin >> i;
+			cout << endl;
+		}
+		while (i < 1)
+		{
+			cout << "Sorry, that row does not exist. Please enter 1 or more." << endl;
+			cout << "\n row = ";
+			cin >> i;
+			cout << endl;
+		}
+
+		if (cin.fail())		//The program will not move on until they enter an integer
+		{
+			while (!(cin >> i))
+			{
+				cerr << "Invalid input, try again: ";
+				cin.clear();
+				cin.ignore(numeric_limits<streamsize>::max(), '\n');
+			}
+		}
+
+		// Get the new content for row i
+		double newscore;
+		cout << "What is the new score you want to store in row " << i << "? ";
+		cin >> newscore;
+
+		//Validate the input for the new score
+		if (cin.fail())		//The program will not move on if it receives invalid input
+		{
+			while (!(cin >> newscore))
+			{
+				cerr << "Invalid input, try again: ";
+				cin.clear();
+				cin.ignore(numeric_limits<streamsize>::max(), '\n');
+			}
+		}
+
+		// Change the new score in the array
+		scores[i] = newscore;
+		cout << endl;
+	}
 }
