@@ -13,7 +13,7 @@ bool isInService;					// for indicating whether the program should still be runn
 
 // Function prototypes
 void displayMenu();
-int keyboard(int numStudents, double scores[]);
+int keyboard(int & numStudents, double scores[]);
 void writetofile(string filename, int numStudents, double scores[]);
 int readfile(string filename, double scores[]);
 void displayscores(int numStudents, double scores[]);
@@ -119,7 +119,7 @@ void displayMenu()
 //*******************************************************************************************
 //The keyboard function gets input from the keyboard and stores it in an array              *
 //*******************************************************************************************
-int keyboard(int numStudents, double scores[])
+int keyboard(int & numStudents, double scores[])
 {
 	//Get the number of students from the user
 	cout << "\n How many students do you want the enter scores for?";
@@ -156,10 +156,9 @@ int keyboard(int numStudents, double scores[])
 	cout << "\n Then you will return to the main menu." << endl << endl;
 
 	// Write the array to store in the scores for that number of students
-	scores[0] = numStudents;
-	for (int i = 1; i < numStudents + 1; i++)
+	for (int i = 0; i < numStudents; i++)
 	{
-		cout << "Score for student " << i << " = ";
+		cout << "Score for student " << i + 1 << " = ";
 		cin >> scores[i];
 
 		if (cin.fail())		//The program will not move on if it receives invalid input
@@ -174,7 +173,11 @@ int keyboard(int numStudents, double scores[])
 
 		//Stop the loop if they are done entering scores
 		if (scores[i] == -1)
+		{
+			numStudents = i;
+			cout << "You have scores entered for " << numStudents << " students." << endl << endl;
 			break;
+		}
 	}
 	cout << endl;
 	return numStudents;
@@ -187,26 +190,36 @@ int keyboard(int numStudents, double scores[])
 //*******************************************************************************************
 void writetofile(string filename, int numStudents, double scores[])
 {
-	//Get the file name from the user
-	cout << "What would you like to name your file? ";
-	cin >> filename;
-	cout << endl;
-
-	// Create the file
-	filename = filename + ".txt";
-	ofstream fout;
-	fout.open(filename.c_str());
-
-	cout << setprecision(3);
-	for (int i = 0; i <= numStudents; i++)
+	// Check to make sure there is data
+	if (numStudents < 1)
 	{
-		fout << scores[i] << endl;
+		cout << "Error! There is not even one student. ";
+		cout << "You may need to input scores. Press K or R on the main menu." << endl << endl;
 	}
-	fout.close();
-	cout << endl;
-	cout << "Success! The scores were stored in " << filename << endl << endl;
-}
+	else
+	{
+		//Get the file name from the user
+		cout << "What would you like to name your file? ";
+		cin >> filename;
+		cout << endl;
 
+		// Create the file
+		filename = filename + ".txt";
+		ofstream fout;
+		fout.open(filename.c_str());
+
+		// Output the data to the file
+		cout << setprecision(3);
+		fout << numStudents << endl;
+		for (int i = 0; i < numStudents; i++)
+		{
+			fout << scores[i] << endl;
+		}
+		fout.close();
+		cout << endl;
+		cout << "Success! The scores were stored in " << filename << endl << endl;
+	}
+}
 
 //*******************************************************************************************
 //This reads the scores out of a file that was previously created by this program.			*
@@ -223,7 +236,7 @@ int readfile(string filename, double scores[])
 
 	// Open the file
 	filename = filename + ".txt";
-	ifstream fin(filename);
+	ifstream fin;
 	fin.open(filename);
 	cout << "I am trying to open " << filename << endl;
 
@@ -232,21 +245,19 @@ int readfile(string filename, double scores[])
 	if (fin.is_open())
 	{
 		// Get numStudents
-		fin >> foo;
-		numStudents = foo;
+		fin >> numStudents;
 		cout << "# of students = " << numStudents << endl;
-		scores[0] = numStudents;
 
 		// Get scores
-		for (int i = 1; i <= numStudents; i++)
+		for (int i = 0; i < numStudents; i++)
 		{
 			fin >> foo;
 			scores[i] = foo;
 			if (fin.fail())
 			{
 				cout << "Reached the end of the file." << endl;
+				break;
 			}
-			break;
 		}
 		fin.close();
 		cout << "Success! The scores were read in from the file." << endl << endl;
@@ -256,6 +267,7 @@ int readfile(string filename, double scores[])
 	{
 		numStudents = 0;
 		cout << "Unable to open file, please try again." << endl << endl;
+		return numStudents;
 	}
 }
 
@@ -266,20 +278,17 @@ int readfile(string filename, double scores[])
 //*******************************************************************************************
 void displayscores(int numStudents, double scores[])
 {
-	(double)numStudents; //Converts int to double so that it can store it in the double array
-	numStudents = scores[0];
-
 	// Check to make sure there is data
 	if (numStudents < 1)
 	{
-		cout << "Error! There is not even one student.";
+		cout << "Error! There is not even one student. ";
 		cout << "You may need to input scores. Press K or R on the main menu." << endl;
 	}
 	else
 	{
 		cout << setprecision(3);
 		cout << "The number of students that have scores entered is " << numStudents << "." << endl;
-		for (int i = 1; i <= numStudents; i++)
+		for (int i = 0; i < numStudents; i++)
 		{
 			cout << scores[i] << endl;
 		}
@@ -294,7 +303,7 @@ void modifyscores(int numStudents, double scores[])
 	// Check to make sure there is data
 	if (numStudents < 1)
 	{
-		cout << "Error! There is not even one student.";
+		cout << "Error! There is not even one student. ";
 		cout << "You may need to input scores. Press K or R on the main menu." << endl << endl;
 	}
 	else
@@ -347,7 +356,7 @@ void modifyscores(int numStudents, double scores[])
 		}
 
 		// Change the new score in the array
-		scores[i] = newscore;
+		scores[i - 1] = newscore;
 		cout << endl;
 	}
 }
