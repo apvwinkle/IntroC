@@ -1,6 +1,6 @@
 
 
-// Midterm Project: Nim Game
+// Midterm Project: Nim Game -- Dumb Version
 
 
 #include <iostream>
@@ -31,7 +31,7 @@ int main()
 	// Display a welcome message
 	cout << "Hello! Welcome to the Nim game!" << endl;
 	cout << "________________________________________________________________________" << endl << endl;
-	
+
 	// Declaration of variables and initial values
 	m = 3;
 	n = 12;
@@ -129,6 +129,8 @@ int main()
 }
 
 
+
+
 //*******************************************************************************************
 // The displayhelp function displays directions for the game, and also instructions on		*
 // how to change the game settings.																			*
@@ -145,9 +147,10 @@ void displayhelp()
 	cout << " \n computer goes first or whether you go first." << endl;
 	cout << "________________________________________________________________________" << endl;
 
-	cout << "\n   To play with the current settings, press P on the menu screen. ";
-	cout << "\n Otherwise, you can change any of the settings before you start playing ";
-	cout << "\n by pressing the letter corresponding to the menu choice." << endl;
+	cout << "\n   To play with the current settings, press P on the menu screen ";
+	cout << "\n followed by an enter. Otherwise, you can change any of the settings";
+	cout << "\n before you start playing by typing the letter corresponding to the";
+	cout << "\n menu choice and then pressing enter." << endl;
 	cout << "________________________________________________________________________" << endl << endl;
 
 	// Wait for the user input before continuing the program
@@ -164,7 +167,7 @@ void displayhelp()
 
 void displaymenu()
 {
-	
+
 	cout << "Please input the character corresponding to the menu choice." << endl << endl;
 
 	cout << "N : change the Number of coins to begin with." << endl;
@@ -214,22 +217,32 @@ int getnumber(string number)
 	int num;			// for storing the value entered by the user
 	cin.ignore(numeric_limits<streamsize>::max(), '\n'); //cleans up user error
 
-	cout << "Please enter a positive integer for " << number << " to change the number of coins." << endl;
-	cout << number << " = ";
-	cin >> num;
+	do {
+		cout << "Please enter a positive integer for " << number << " to change the number of coins." << endl;
+		cout << number << " = ";
+		cin >> num;
 
-	// Validate the input
-	if (cin.fail())
-	{
-		while (!(cin >> num) || num < 1)
+		// Validate the input
+		if (num < 1)
+			if (number == "n")
+				cout << "\n There must be at least one coin in the pile. \n Please try again." << endl << endl;
+			else
+				cout << "\n You must be able to take at least one coin. \n Please try again." << endl << endl;
+
+		if (cin.fail())
 		{
-			cerr << "Invalid input, try again: ";
-			cin.clear();
-			cin.ignore(numeric_limits<streamsize>::max(), '\n');
+			while (!(cin >> num) || num < 1)
+			{
+				cerr << "\n Invalid input, try again: ";
+				cin.clear();
+				cin.ignore(numeric_limits<streamsize>::max(), '\n');
+			}
 		}
-	}
+	} while (num < 1);
+
+
 	cout << "________________________________________________________________________" << endl << endl;
-	return abs(num);
+	return num;
 }
 
 //*******************************************************************************************
@@ -238,7 +251,7 @@ int getnumber(string number)
 
 int randcoin()
 {
-	srand((unsigned int) time(NULL));
+	srand((unsigned int)time(NULL));
 
 	if (k < m)		// We don't want a random value bigger than k!
 		return (rand() % k) + 1;
@@ -312,7 +325,7 @@ void nimgame()
 			// Computer takes away coins
 			coins = randcoin();
 			cout << "\n The computer took away " << coins << " coins." << endl << endl;
-			
+
 			// Update k based on how many coins the computer took
 			k = k - coins;
 
@@ -324,7 +337,7 @@ void nimgame()
 			cout << "________________________________________________________________________" << endl << endl;
 		}
 	}
-// Now that k = 0, we need to determine who won.
+	// Now that k = 0, we need to determine who won.
 	if (lastwins)
 		if (userturn)		//This means the computer took the last turn and thus the last coin.
 			cout << "I win! Do you want to play again?" << endl << endl;
@@ -345,4 +358,3 @@ void nimgame()
 	cout << "________________________________________________________________________" << endl << endl;
 
 }
-
